@@ -19,7 +19,7 @@ type Inputs = {
 
 const AddDateModal = ({ showModal, setShowModal }: Props) => {
     const queryClient = useQueryClient();
-    const { data, isLoading } = useQuery({
+    const { data } = useQuery({
         queryKey: ["users"],
         queryFn: getUsers,
     });
@@ -35,6 +35,7 @@ const AddDateModal = ({ showModal, setShowModal }: Props) => {
     const {
         register,
         handleSubmit,
+        watch,
         formState: { errors },
     } = useForm<Inputs>();
     const onSubmit: SubmitHandler<Inputs> = (data) =>
@@ -48,6 +49,16 @@ const AddDateModal = ({ showModal, setShowModal }: Props) => {
         };
         return obj;
     };
+
+    const selectedUsers = watch(["user1", "user2"]);
+    const dietaryReqs =
+        data
+            ?.filter((d: TUser) => selectedUsers.includes(d.id!.toString()))
+            .map((x: TUser) => x.dietary) || [];
+    const postcodes =
+        data
+            ?.filter((d: TUser) => selectedUsers.includes(d.id!.toString()))
+            .map((x: TUser) => x.postcode) || [];
 
     return (
         <dialog
@@ -92,6 +103,23 @@ const AddDateModal = ({ showModal, setShowModal }: Props) => {
                     </select>
                     {errors.user2 && <span>This field is required</span>}
                 </div>
+                {dietaryReqs.length > 0 ? (
+                    <div className="block text-gray-700 text-sm font-bold mb-2">
+                        <label>Dietary requirements</label>
+                        <p>{[].concat(...dietaryReqs).join(", ")}</p>
+                    </div>
+                ) : (
+                    <div className="block text-gray-700 text-sm font-bold mb-2">
+                        <label>Dietary requirements</label>
+                        <p>None</p>
+                    </div>
+                )}
+                {postcodes.length > 0 ? (
+                    <div className="block text-gray-700 text-sm font-bold mb-2">
+                        <label>Postcodes</label>
+                        <p>{postcodes.join(", ")}</p>
+                    </div>
+                ) : null}
                 <div className="block text-gray-700 text-sm font-bold mb-2">
                     <label htmlFor="datetime">Date and time</label>
                     <input
